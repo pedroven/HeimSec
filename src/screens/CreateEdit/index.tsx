@@ -1,13 +1,32 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Button, ScrollView } from 'react-native';
+import { NavigationScreenProp } from 'react-navigation';
 
-// import { Container } from './styles';
+import Header from '../../components/Header';
 
-const CreateEdit = () => {
+interface IProps {
+	navigation: NavigationScreenProp<any, any>;
+}
+
+const CreateEdit = ({ navigation }: IProps) => {
 	return (
-		<View>
-			<Text>CreateEdit</Text>
-		</View>
+		<React.Fragment>
+			<Header
+				goSettings={() => navigation.navigate('Settings')}
+				goHome={() => navigation.navigate('Home')}
+			/>
+			<ScrollView>
+				<Text>CreateEdit</Text>
+				<Button
+					title="Go to Create"
+					onPress={() => navigation.navigate('CreateEdit')}
+				/>
+				<Button
+					title="Go to Settings"
+					onPress={() => navigation.navigate('Settings')}
+				/>
+			</ScrollView>
+		</React.Fragment>
 	);
 };
 
