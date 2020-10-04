@@ -1,13 +1,24 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View, Text, Button, ScrollView } from 'react-native';
+import { NavigationScreenProp } from 'react-navigation';
 
-// import { Container } from './styles';
+import Header from '../../components/Header';
 
-const Settings = () => {
+interface IProps {
+	navigation: NavigationScreenProp<any, any>;
+}
+
+const Settings = ({ navigation }: IProps) => {
 	return (
-		<View>
-			<Text>Settings</Text>
-		</View>
+		<React.Fragment>
+			<Header
+				goSettings={() => navigation.navigate('Settings')}
+				goHome={() => navigation.navigate('Home')}
+			/>
+			<ScrollView>
+				<Text>Settings</Text>
+			</ScrollView>
+		</React.Fragment>
 	);
 };
 
