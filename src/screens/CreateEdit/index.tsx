@@ -4,7 +4,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 
 import Header from '../../components/Header';
 
-import { Button, Form, Input, Container, TextButton } from './styles';
+import { Button, Form, Input, Container, ButtonText } from './styles';
 
 interface IProps {
 	navigation: NavigationScreenProp<any, any>;
@@ -29,7 +29,7 @@ const CreateEdit = ({ navigation }: IProps) => {
 							color="#fff"
 							style={{ position: 'relative', top: 2 }}
 						/>
-						<TextButton>Salvar</TextButton>
+						<ButtonText>Salvar</ButtonText>
 					</Button>
 				</Form>
 			</Container>
