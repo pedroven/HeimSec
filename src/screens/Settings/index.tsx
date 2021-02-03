@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Button, ScrollView } from 'react-native';
 import { NavigationScreenProp } from 'react-navigation';
-import PINCode, {
+import {
 	hasUserSetPinCode,
-	resetPinCodeInternalStates,
 	deleteUserPinCode
 } from '@haskkor/react-native-pincode';
 
@@ -36,7 +35,6 @@ const Settings = ({ navigation }: IProps) => {
 
 	const clearPin = async () => {
 		await deleteUserPinCode();
-		await resetPinCodeInternalStates();
 	};
 
 	return (
@@ -59,7 +57,7 @@ const Settings = ({ navigation }: IProps) => {
 								<Text>Criar novo PIN</Text>
 							</ButtonPIN>
 							<ButtonClear onPress={clearPin}>
-								<Text>Remover todas as senhas e PIN Code</Text>
+								<Text>Remover PIN Code</Text>
 							</ButtonClear>
 						</Options>
 					</Container>

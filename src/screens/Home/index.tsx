@@ -16,11 +16,7 @@ import Header from '../../components/Header';
 import AddButton from './components/AddButton';
 
 import { Container, Card, TitleArea, CardText, DeleteButton } from './styles';
-import PINCode, {
-	hasUserSetPinCode,
-	resetPinCodeInternalStates,
-	deleteUserPinCode
-} from '@haskkor/react-native-pincode';
+import { hasUserSetPinCode } from '@haskkor/react-native-pincode';
 
 import PINCodeScreen from '../../components/PINCodeScreen';
 
@@ -113,7 +109,10 @@ const Home = ({ navigation }: IProps) => {
 						</Card>
 					</Container>
 					<AddButton
-						goCreate={() => navigation.navigate('CreateEdit')}
+						goCreate={() =>
+							navigation.navigate('CreateEdit', {
+								actionType: 'create'
+							})}
 					/>
 				</React.Fragment>
 			)}

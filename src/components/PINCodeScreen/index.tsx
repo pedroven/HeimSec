@@ -25,7 +25,16 @@ const PINCodeScreen = ({ status, finishProcess }: IProps) => {
 				touchIDDisabled={true}
 				finishProcess={finishProcess}
 				colorCircleButtons="#6c53a2"
-				numbersButtonOverlayColor="orange"
+				colorPassword="#6c53a2"
+				colorPasswordEmpty="#6c53a2"
+				numbersButtonOverlayColor="#fff"
+				stylePinCodeButtonNumber="#fff"
+				titleEnter="Digite seu PIN code"
+				titleChoose="Crie aqui seu PIN code"
+				subtitleChoose="para manter suas informações seguras"
+				titleConfirm="Confirme seu PIN code"
+				titleAttemptFailed="PIN code incorreto"
+				subtitleError="por favor, tente novamente"
 			/>
 		</View>
 	);
