@@ -91,7 +91,9 @@ const Home = ({ navigation }: IProps) => {
 								)}
 							</TouchableOpacity>
 						</TitleArea>
-						<Card onPress={() => navigation.navigate('CreateEdit')}>
+						<Card onPress={() => navigation.navigate('CreateEdit', {
+								actionType: 'edit'
+							})}>
 							<CardText>Titulo</CardText>
 							<CardText>url</CardText>
 							<CardText

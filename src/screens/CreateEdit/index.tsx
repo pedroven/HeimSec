@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { NavigationScreenProp, } from 'react-navigation';
+import { NavigationScreenProp } from 'react-navigation';
 import { RouteProp } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { v4 as uuid } from 'uuid';
 
 import Header from '../../components/Header';
 
 import { Button, Form, Input, Container, ButtonText } from './styles';
 
 interface IFormData {
+	id?: string;
 	title: string;
 	url: string;
 	password: string;
@@ -34,18 +36,46 @@ const CreateEdit = ({ navigation, route, data }: IProps) => {
 			if (route.params) {
 				if (route.params.actionType === 'create') {
 					const allItems = await AsyncStorage.getItem('Items');
-					console.log(allItems);
+					if (allItems === null) {
+						const id: string = uuid();
+						let newItems: any[] = [];
+						newItems.push({ ...formData, id: id });
+						await AsyncStorage.setItem(
+							'Items',
+							JSON.stringify(newItems)
+						);
+					} else {
+						const id: string = uuid();
+						let items = JSON.parse(allItems);
+						items.push({ ...formData, id: id });
+						await AsyncStorage.setItem(
+							'Items',
+							JSON.stringify(items)
+						);
+					}
 				}
-				if (route.params.actionType === 'create') {
-
+				if (route.params.actionType === 'edit') {
+					let allItems = await AsyncStorage.getItem('Items');
+					console.log(allItems);
+					// if (allItems) {
+					// 	let parsedItems = JSON.parse(allItems);
+					// 	let newItems = parsedItems.map(
+					// 		(item: any) =>
+					// 			item.id === formData.id
+					// 				? (item = formData)
+					// 				: item
+					// 	);
+					// 	await AsyncStorage.setItem(
+					// 		'Items',
+					// 		JSON.stringify(newItems)
+					// 	);
+					// }
 				}
 			}
-			// if (actionType === 'create') console.log('show');
-			// await AsyncStorage.setItem('@storage_Key', value)
-		  } catch (e) {
-			// saving error
-		  }
-		navigation.navigate('Home')
+		} catch (e) {
+			console.log(e);
+		}
+		navigation.navigate('Home');
 	};
 
 	return (
