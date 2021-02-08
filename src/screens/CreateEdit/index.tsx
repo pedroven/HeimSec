@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { Alert } from 'react-native';
 import { NavigationScreenProp } from 'react-navigation';
 import { RouteProp } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { v4 as uuid } from 'uuid';
+import AsyncStorage from '@react-native-community/async-storage';
+import uuid from 'react-native-uuid';
 
 import Header from '../../components/Header';
 
@@ -18,26 +19,29 @@ interface IFormData {
 interface IProps {
 	navigation: NavigationScreenProp<any, any>;
 	route: RouteProp<any, any>;
-	data?: IFormData;
 }
 
-const CreateEdit = ({ navigation, route, data }: IProps) => {
+const CreateEdit = ({ navigation, route }: IProps) => {
+	const { item }: any = route.params;
 	const [ formData, setFormData ] = useState<IFormData>(
-		data || {
+		(item as IFormData) || {
 			title: '',
 			url: '',
 			password: ''
 		}
 	);
+	const [ changePassword, setChangePassword ] = useState<boolean>(false);
+	const [ confirmationPassword, setConfirmationPassword ] = useState<string>(
+		''
+	);
 
 	const handleSubmit = async () => {
 		try {
-			console.log(route.params && route.params.actionType);
 			if (route.params) {
 				if (route.params.actionType === 'create') {
 					const allItems = await AsyncStorage.getItem('Items');
 					if (allItems === null) {
-						const id: string = uuid();
+						const id: string = uuid.v4();
 						let newItems: any[] = [];
 						newItems.push({ ...formData, id: id });
 						await AsyncStorage.setItem(
@@ -45,7 +49,7 @@ const CreateEdit = ({ navigation, route, data }: IProps) => {
 							JSON.stringify(newItems)
 						);
 					} else {
-						const id: string = uuid();
+						const id: string = uuid.v4();
 						let items = JSON.parse(allItems);
 						items.push({ ...formData, id: id });
 						await AsyncStorage.setItem(
@@ -53,29 +57,33 @@ const CreateEdit = ({ navigation, route, data }: IProps) => {
 							JSON.stringify(items)
 						);
 					}
+					navigation.navigate('Home');
 				}
 				if (route.params.actionType === 'edit') {
-					let allItems = await AsyncStorage.getItem('Items');
-					console.log(allItems);
-					// if (allItems) {
-					// 	let parsedItems = JSON.parse(allItems);
-					// 	let newItems = parsedItems.map(
-					// 		(item: any) =>
-					// 			item.id === formData.id
-					// 				? (item = formData)
-					// 				: item
-					// 	);
-					// 	await AsyncStorage.setItem(
-					// 		'Items',
-					// 		JSON.stringify(newItems)
-					// 	);
-					// }
+					if (formData.password !== confirmationPassword) {
+						Alert.alert('Senhas diferentes');
+					} else {
+						let allItems = await AsyncStorage.getItem('Items');
+						if (allItems) {
+							let parsedItems = JSON.parse(allItems);
+							let newItems = parsedItems.map(
+								(item: any) =>
+									item.id === formData.id
+										? (item = formData)
+										: item
+							);
+							await AsyncStorage.setItem(
+								'Items',
+								JSON.stringify(newItems)
+							);
+						}
+						navigation.navigate('Home');
+					}
 				}
 			}
 		} catch (e) {
 			console.log(e);
 		}
-		navigation.navigate('Home');
 	};
 
 	return (
@@ -93,7 +101,7 @@ const CreateEdit = ({ navigation, route, data }: IProps) => {
 							setFormData({ ...formData, title: text })}
 					/>
 					<Input
-						placeholder="URL do site"
+						placeholder="Site"
 						value={formData.url}
 						onChangeText={(text) =>
 							setFormData({ ...formData, url: text })}
@@ -102,9 +110,23 @@ const CreateEdit = ({ navigation, route, data }: IProps) => {
 						secureTextEntry={true}
 						placeholder="Senha"
 						value={formData.password}
-						onChangeText={(text) =>
-							setFormData({ ...formData, password: text })}
+						onChangeText={(text) => {
+							if (formData.password !== text)
+								setChangePassword(true);
+							setFormData({ ...formData, password: text });
+						}}
 					/>
+					{route.params &&
+					route.params.actionType === 'edit' &&
+					changePassword === true && (
+						<Input
+							secureTextEntry={true}
+							placeholder="Confirmar Senha"
+							value={confirmationPassword}
+							onChangeText={(text) =>
+								setConfirmationPassword(text)}
+						/>
+					)}
 					<Button onPress={handleSubmit}>
 						<FeatherIcon
 							name="check"

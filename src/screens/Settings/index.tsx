@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { Text } from 'react-native';
 import { NavigationScreenProp } from 'react-navigation';
 import {
 	hasUserSetPinCode,
@@ -54,10 +54,14 @@ const Settings = ({ navigation }: IProps) => {
 					<Container>
 						<Options>
 							<ButtonPIN onPress={showChoosePinLock}>
-								<Text>Criar novo PIN</Text>
+								<Text style={{ color: '#fff' }}>
+									Criar novo PIN
+								</Text>
 							</ButtonPIN>
 							<ButtonClear onPress={clearPin}>
-								<Text>Remover PIN Code</Text>
+								<Text style={{ color: '#fff' }}>
+									Remover PIN Code
+								</Text>
 							</ButtonClear>
 						</Options>
 					</Container>

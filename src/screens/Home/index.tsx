@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-	View,
-	Text,
-	Button,
-	ScrollView,
-	TouchableOpacity,
-	Alert
-} from 'react-native';
+import { Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { NavigationScreenProp } from 'react-navigation';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import AntIcon from 'react-native-vector-icons/AntDesign';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import Header from '../../components/Header';
 
@@ -24,6 +18,13 @@ interface IProps {
 	navigation: NavigationScreenProp<any, any>;
 }
 
+interface Item {
+	id: string;
+	title: string;
+	url: string;
+	password: string;
+}
+
 const Home = ({ navigation }: IProps) => {
 	const [ showPasswords, setShowPasswords ] = useState<boolean>(false);
 	const [ showPinLock, setShowPinLock ] = useState<boolean>(false);
@@ -31,14 +32,13 @@ const Home = ({ navigation }: IProps) => {
 	const [ PINCodeStatus, setPINCodeStatus ] = useState<
 		'choose' | 'enter' | 'locked' | undefined
 	>('choose');
+	const [ items, setItems ] = useState<Item[]>([]);
 
 	const showEnterPinLock = async () => {
 		const hasPIN = await hasUserSetPinCode();
 		if (hasPIN) {
 			setShowPinLock(true);
 			setPINCodeStatus('enter');
-		} else {
-			console.log('deu ruim');
 		}
 	};
 
@@ -47,6 +47,17 @@ const Home = ({ navigation }: IProps) => {
 		showEnterPinLock();
 	}, []);
 
+	useEffect(() => {
+		const getItems = async () => {
+			let allItems = await AsyncStorage.getItem('Items');
+			if (allItems) {
+				let parsedItems = JSON.parse(allItems);
+				setItems(parsedItems);
+			}
+		};
+		getItems();
+	});
+
 	const finishProcess = async () => {
 		const hasPIN = await hasUserSetPinCode();
 		if (hasPIN) {
@@ -54,6 +65,37 @@ const Home = ({ navigation }: IProps) => {
 			!initialAccess && navigation.navigate('CreateEdit');
 			setInitialAccess(false);
 		}
+	};
+
+	const deleteItem = async (id: string) => {
+		Alert.alert(
+			'Remover Senha',
+			'Deseja realmente remover essa senha?',
+			[
+				{
+					text: 'Cancelar',
+					style: 'cancel'
+				},
+				{
+					text: 'Sim',
+					onPress: async () => {
+						let allItems = await AsyncStorage.getItem('Items');
+						if (allItems) {
+							let parsedItems = JSON.parse(allItems);
+							let newItems = parsedItems.filter(
+								(item: Item) => item.id !== id
+							);
+							await AsyncStorage.setItem(
+								'Items',
+								JSON.stringify(newItems)
+							);
+							setItems(newItems);
+						}
+					}
+				}
+			],
+			{ cancelable: true }
+		);
 	};
 
 	return (
@@ -91,24 +133,42 @@ const Home = ({ navigation }: IProps) => {
 								)}
 							</TouchableOpacity>
 						</TitleArea>
-						<Card onPress={() => navigation.navigate('CreateEdit', {
-								actionType: 'edit'
-							})}>
-							<CardText>Titulo</CardText>
-							<CardText>url</CardText>
-							<CardText
-								style={
-									!showPasswords && {
-										letterSpacing: 4
-									}
-								}
-							>
-								{showPasswords ? 'senha' : '******'}
-							</CardText>
-							<DeleteButton onPress={() => console.log('Apagar')}>
-								<AntIcon name="delete" size={22} color="#fff" />
-							</DeleteButton>
-						</Card>
+						{items &&
+							items.map((item) => (
+								<Card
+									key={item.id}
+									onPress={() =>
+										navigation.navigate('CreateEdit', {
+											actionType: 'edit',
+											item: item
+										})}
+								>
+									<CardText>{item.title}</CardText>
+									<CardText>{item.url}</CardText>
+									<CardText
+										style={
+											!showPasswords && {
+												letterSpacing: 4
+											}
+										}
+									>
+										{showPasswords ? (
+											item.password
+										) : (
+											'******'
+										)}
+									</CardText>
+									<DeleteButton
+										onPress={() => deleteItem(item.id)}
+									>
+										<AntIcon
+											name="delete"
+											size={22}
+											color="#fff"
+										/>
+									</DeleteButton>
+								</Card>
+							))}
 					</Container>
 					<AddButton
 						goCreate={() =>
