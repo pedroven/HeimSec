@@ -12,6 +12,8 @@ target 'HeimSec' do
 
   pod 'react-native-uuid-generator', :path => '../node_modules/react-native-uuid-generator'
 
+  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
+
   target 'HeimSecTests' do
     inherit! :complete
     # Pods for testing

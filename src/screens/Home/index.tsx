@@ -11,6 +11,7 @@ import AddButton from './components/AddButton';
 
 import { Container, Card, TitleArea, CardText, DeleteButton } from './styles';
 import { hasUserSetPinCode } from '@haskkor/react-native-pincode';
+import SplashScreen from 'react-native-splash-screen';
 
 import PINCodeScreen from '../../components/PINCodeScreen';
 
@@ -43,8 +44,12 @@ const Home = ({ navigation }: IProps) => {
 	};
 
 	useEffect(() => {
-		setInitialAccess(true);
-		showEnterPinLock();
+		const init = async () => {
+			setInitialAccess(true);
+			SplashScreen.hide();
+			await showEnterPinLock();
+		};
+		init();
 	}, []);
 
 	useEffect(() => {
