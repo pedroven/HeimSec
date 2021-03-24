@@ -30,32 +30,46 @@ const CreateEdit = ({ navigation, route }: IProps) => {
 			password: ''
 		}
 	);
-	const [ changePassword, setChangePassword ] = useState<boolean>(false);
 	const [ confirmationPassword, setConfirmationPassword ] = useState<string>(
 		''
 	);
 
+	const isValidForm = (data: IFormData) => {
+		if (data.title && data.password) {
+			return true;
+		}
+		return false;
+	};
+
+	const createItem = async (items: IFormData[], item: IFormData) => {
+		const id: string = uuid.v4();
+		items.push({ ...item, id: id });
+		await AsyncStorage.setItem('Items', JSON.stringify(items));
+	};
+
+	const editItem = async (items: IFormData[], updatedItem: IFormData) => {
+		let newItems = items.map(
+			(item: IFormData) =>
+				item.id === updatedItem.id ? (item = updatedItem) : item
+		);
+		await AsyncStorage.setItem('Items', JSON.stringify(newItems));
+	};
+
 	const handleSubmit = async () => {
 		try {
 			if (route.params) {
+				if (!isValidForm(formData)) {
+					Alert.alert('Dados do formulário estão inválidos');
+					return;
+				}
 				if (route.params.actionType === 'create') {
 					const allItems = await AsyncStorage.getItem('Items');
 					if (allItems === null) {
-						const id: string = uuid.v4();
-						let newItems: any[] = [];
-						newItems.push({ ...formData, id: id });
-						await AsyncStorage.setItem(
-							'Items',
-							JSON.stringify(newItems)
-						);
+						let newItems: IFormData[] = [];
+						await createItem(newItems, formData);
 					} else {
-						const id: string = uuid.v4();
 						let items = JSON.parse(allItems);
-						items.push({ ...formData, id: id });
-						await AsyncStorage.setItem(
-							'Items',
-							JSON.stringify(items)
-						);
+						await createItem(items, formData);
 					}
 					navigation.navigate('Home');
 				}
@@ -65,24 +79,15 @@ const CreateEdit = ({ navigation, route }: IProps) => {
 					} else {
 						let allItems = await AsyncStorage.getItem('Items');
 						if (allItems) {
-							let parsedItems = JSON.parse(allItems);
-							let newItems = parsedItems.map(
-								(item: any) =>
-									item.id === formData.id
-										? (item = formData)
-										: item
-							);
-							await AsyncStorage.setItem(
-								'Items',
-								JSON.stringify(newItems)
-							);
+							let parsedItems: IFormData[] = JSON.parse(allItems);
+							await editItem(parsedItems, formData);
 						}
 						navigation.navigate('Home');
 					}
 				}
 			}
 		} catch (e) {
-			console.log(e);
+			Alert.alert(e);
 		}
 	};
 
@@ -112,13 +117,11 @@ const CreateEdit = ({ navigation, route }: IProps) => {
 						value={formData.password}
 						onChangeText={(text) => {
 							if (formData.password !== text)
-								setChangePassword(true);
-							setFormData({ ...formData, password: text });
+								setFormData({ ...formData, password: text });
 						}}
 					/>
 					{route.params &&
-					route.params.actionType === 'edit' &&
-					changePassword === true && (
+					route.params.actionType === 'edit' && (
 						<Input
 							secureTextEntry={true}
 							placeholder="Confirmar Senha"
