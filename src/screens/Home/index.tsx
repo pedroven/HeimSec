@@ -28,7 +28,9 @@ interface Item {
 
 const Home = ({ navigation }: IProps) => {
 	const [ showPasswords, setShowPasswords ] = useState<boolean>(false);
-	const [ showPinLock, setShowPinLock ] = useState<boolean>(false);
+	const [ showPinLock, setShowPinLock ] = useState<
+		'initial' | 'active' | 'deactivated'
+	>('initial');
 	const [ initialAccess, setInitialAccess ] = useState<boolean>(false);
 	const [ PINCodeStatus, setPINCodeStatus ] = useState<
 		'choose' | 'enter' | 'locked' | undefined
@@ -38,8 +40,10 @@ const Home = ({ navigation }: IProps) => {
 	const showEnterPinLock = async () => {
 		const hasPIN = await hasUserSetPinCode();
 		if (hasPIN) {
-			setShowPinLock(true);
+			setShowPinLock('active');
 			setPINCodeStatus('enter');
+		} else {
+			setShowPinLock('deactivated');
 		}
 	};
 
@@ -66,7 +70,7 @@ const Home = ({ navigation }: IProps) => {
 	const finishProcess = async () => {
 		const hasPIN = await hasUserSetPinCode();
 		if (hasPIN) {
-			setShowPinLock(false);
+			setShowPinLock('deactivated');
 			!initialAccess && navigation.navigate('CreateEdit');
 			setInitialAccess(false);
 		}
@@ -87,13 +91,8 @@ const Home = ({ navigation }: IProps) => {
 						let allItems = await AsyncStorage.getItem('Items');
 						if (allItems) {
 							let parsedItems = JSON.parse(allItems);
-							let newItems = parsedItems.filter(
-								(item: Item) => item.id !== id
-							);
-							await AsyncStorage.setItem(
-								'Items',
-								JSON.stringify(newItems)
-							);
+							let newItems = parsedItems.filter((item: Item) => item.id !== id);
+							await AsyncStorage.setItem('Items', JSON.stringify(newItems));
 							setItems(newItems);
 						}
 					}
@@ -105,13 +104,10 @@ const Home = ({ navigation }: IProps) => {
 
 	return (
 		<React.Fragment>
-			{showPinLock && (
-				<PINCodeScreen
-					status={PINCodeStatus}
-					finishProcess={finishProcess}
-				/>
+			{showPinLock === 'active' && (
+				<PINCodeScreen status={PINCodeStatus} finishProcess={finishProcess} />
 			)}
-			{!showPinLock && (
+			{showPinLock === 'deactivated' && (
 				<React.Fragment>
 					<Header
 						goSettings={() => navigation.navigate('Settings')}
@@ -119,22 +115,14 @@ const Home = ({ navigation }: IProps) => {
 					/>
 					<Container>
 						<TitleArea>
-							<Text style={{ color: '#FFF' }}>Minhas senhas</Text>
+							<Text style={{ color: '#FFF', fontSize: 16 }}>Minhas senhas</Text>
 							<TouchableOpacity
 								onPress={() => setShowPasswords(!showPasswords)}
 							>
 								{showPasswords ? (
-									<FeatherIcon
-										name="eye"
-										size={22}
-										color="#fff"
-									/>
+									<FeatherIcon name="eye" size={22} color="#fff" />
 								) : (
-									<FeatherIcon
-										name="eye-off"
-										size={22}
-										color="#fff"
-									/>
+									<FeatherIcon name="eye-off" size={22} color="#fff" />
 								)}
 							</TouchableOpacity>
 						</TitleArea>
@@ -157,20 +145,10 @@ const Home = ({ navigation }: IProps) => {
 											}
 										}
 									>
-										{showPasswords ? (
-											item.password
-										) : (
-											'******'
-										)}
+										{showPasswords ? item.password : '******'}
 									</CardText>
-									<DeleteButton
-										onPress={() => deleteItem(item.id)}
-									>
-										<AntIcon
-											name="delete"
-											size={22}
-											color="#fff"
-										/>
+									<DeleteButton onPress={() => deleteItem(item.id)}>
+										<AntIcon name="delete" size={22} color="#fff" />
 									</DeleteButton>
 								</Card>
 							))}
